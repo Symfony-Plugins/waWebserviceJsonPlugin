@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.6" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+ <name>waWebserviceJsonPlugin</name>
+ <channel>plugins.symfony-project.org</channel>
+ <summary>Get all your model objects in JSON format</summary>
+ <description>This plugin provides a generic module for providing your data objects in JSON format over HTTP. 
+ It's a kind of REST webservice but currently only the GET action is implemented (no PUT, POST, DELETE) 
+ and it is likely that it will remain in this state because it's primary goal is to READ data and not to ALTER it. 
+ Both Propel and Doctrine ORMs are supported.
+ With this webservice it is possible to retrieve single objects and result lists that can be sorted, filtered, and limited.
+ It was developed and is especially useful as a data provider for ExtJS grids.
+ </description>
+ <lead>
+  <name>Christoph Singer</name>
+  <user>chrisi</user>
+  <email>singer@webagentur72.de</email>
+  <active>yes</active>
+ </lead>
+ <date>2010-06-17</date>
+ <version>
+  <release>0.0.1</release>
+  <api>0.0.1</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.symfony-project.org/license">MIT license</license>
+ <notes>-</notes>
+ <contents>
+  <dir name="/">
+   <file role="data" name="README" />
+   <file role="data" name="LICENSE" />
+   <dir name="config">
+    <file role="data" name="config.php" />
+   </dir>
+   <dir name="lib">
+     <file role="data" name="wa72RequestListBuilder.class.php" />
+     <file role="data" name="wa72SimpleDoctrineListBuilder.class.php" />
+	 <file role="data" name="wa72SimpleListBuilder.interface.php" />
+	 <file role="data" name="wa72SimplePropelListBuilder.class.php" />
+	 <file role="data" name="waWebserviceJsonRouting.class.php" />
+   </dir>
+   <dir name="modules">
+    <dir name="waWebserviceJson">
+     <file role="data" name="actions/actions.class.php" />
+    </dir>
+   </dir>
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.2.4</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.1</min>
+   </pearinstaller>
+   <package>
+    <name>symfony</name>
+    <channel>pear.symfony-project.com</channel>
+    <min>1.3.0</min>
+    <max>1.5.0</max>
+    <exclude>1.5.0</exclude>
+   </package>
+  </required>
+ </dependencies>
+ <phprelease />
+ <changelog>
+ 	<release>
+ 		<version>
+ 			<release>0.0.1</release>
+ 			<api>0.0.1</api>
+		</version>
+		<stability>
+			<release>beta</release>
+			<api>beta</api>
+		</stability>
+		<date>2010-06-16</date>
+		<notes>
+			* inital release
+	    </notes>
+	</release>	
+ </changelog>
+</package>

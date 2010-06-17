@@ -1,0 +1,135 @@
+waWebserviceJsonPlugin
+======================
+
+Summary
+-------
+
+This plugin provides a generic module for providing your data objects in JSON format over HTTP. 
+It's a kind of REST webservice but currently only the GET action is implemented (no PUT, POST, DELETE) 
+and it is likely that it will remain in this state because it's primary goal is to READ data and not to ALTER it. 
+With this webservice it is possible to retrieve single objects and result lists that can be sorted, filtered, and limited.
+It was developed and is especially useful as a data provider for ExtJS grids.
+
+* It's not a code generator, but a ready-to-use generic module to fetch result sets and
+  single records for every ORM model class
+* Gives quickly access to your model objects in JSON format over HTTP but is not as customizable on a per-model
+  or per-module basis as generator solutions are, e.g. sfDoctrineRestGeneratorPlugin 
+* Supports both Doctrine and Propel
+* Supports most needed operations to fetch result sets:
+	* search (on one or more fields, combined by OR)
+	* filtering on the value of one or more fields, combined by AND
+	* sorting
+	* offset and limit
+* The URL parameters for filtering, sorting, offset, and limit were chosen to be what ExtJS uses
+  for data grids with filtering and sorting enabled. So this plugin can be used as a json data provider
+  for ExtJS data grids.
+* Contains a "RequestListBuilder" class for building Propel Criteria Objects or Doctrine Query Objects
+  to fetch the result set according to a standard set of request params (filter, search, sort, dir, offset, limit).
+  This class may be useful for others, too.
+
+Installation
+------------
+
+  * Install the plugin
+
+        $ symfony plugin:install waWebserviceJsonPlugin
+
+  * Clear the cache
+
+        $ symfony cache:clear
+        
+  * Enable the plugin in config/ProjectConfiguration.class.php
+        
+        class ProjectConfiguration extends sfProjectConfiguration
+		{
+  			public function setup()
+  			{
+    			$this->enablePlugins('waWebserviceJsonPlugin');
+    	    ...
+    	    
+  * Enable the waWebserviceJson module in apps/your_app/config/settings.yml:
+  		
+  		enabled_modules:        [..., waWebserviceJson]
+  
+Usage
+-----
+
+The plugin adds a route with url "/waWebserviceJson/:model_class" to your routing system.
+Suppose you have a model class called "Article" you can fetch
+a JSON formatted list of all articles by calling the URL 
+
+	http://yourhost(/your_symfony_project)/waWebserviceJson/Article
+
+To retrieve a single article you have to add the ID to to this URL:
+
+	http://yourhost(/your_symfony_project)/waWebserviceJson/Article/35" 
+
+gives you the Article with ID 35.
+
+
+In order to sort or filter the result list you can append the following parameters to the list url:
+
+  * **filter**: array "filter[name]=value" for record filtering, e.g. "filter[category]=35"
+  * **search**: search term for searching in predefined search fields (see below), e.g. "search=Greece"
+  * **sort**: The fieldname of the field for sorting, e.g. sort=title
+  * **dir**: sorting direction, 'ASC' or 'DESC', default 'ASC'
+  * **offset**: the first record to fetch
+  * **limit**: max. number of records to fetch
+  * **fields**: array of fieldnames to include in the list, e.g. fields[]=title&fields[]=description
+  * **callback**: if provided, the response array is wrapped with callback(...)
+  
+ 
+Customization
+-------------
+
+  * **Fields to include in the list**: If the URL parameter "fields" is not provided, the following 
+    default list fields are used:
+      
+      * if the peer class of the model object (resp. table class in doctrine) has a method 
+      	`getDefaultListFieldnames` this method is called and should return an array of field names
+      	
+      * the default (if no "fields" parameter and no "getDefaultListFieldnames" method is available) 
+      	is to return a generic field "__pk" which contains the primary key value 
+        and a field "__string" which contains the result of a `__toString()`-call on the object
+      
+  * **Fields included in the free text search**: When there is a "search" url parameter in the list call
+    a text search with this value is performed in defined searchfields.
+    To specify the search fields for a model class, you have to create a method `getDefaultSearchFieldnames`
+    in the peer class that returns an array of field names, e.g.
+      
+        class ArticlePeer extends BaseArticlePeer {
+          public function getDefaultSearchFieldnames() {
+            return array('title', 'teaser', 'text');
+          }
+        }
+      
+    Internally, the search URL parameter will be surrounded by '%' and then a LIKE match on all defined search
+    fields combined by OR will be executed.
+    In the above example, if the URL for the list call contains the parameter "search=Greece", the following
+    SQL search will be performed in the database:
+    
+       SELECT ... FROM article WHERE (title LIKE '%Greece%' OR teaser LIKE '%Greece%' OR text LIKE '%Greece%')
+  
+  * **Default filters**: You may want to restrict the results of the webservice, e.g. to show only
+    approved articles. For this, you may specify "default filters" that are always applied to
+    the results regardless of the URL params. To specify the default filters, define a method
+    `getDefaultListFilters` in your peer class (table class in Doctrine) that returns an array
+    of fieldname => filtervalue pairs. E.g., to show only approved articles you would use:
+    
+        class ArticlePeer extends BaseArticlePeer {
+          public function getDefaultListFilters() {
+            return array('is_approved' => true);
+          }
+        }
+  
+  * **Converting a model object to JSON**: the conversion of a model object to JSON format is done by first 
+    calling the method `$object->toArray()` and then `json_encode()` on this array. If you want more control
+    over this conversion (e.g. specify which fields should be included or excluded) you can define a method `toArrayForWebservice()`
+    in your model class. If the method `toArrayForWebservice()` is present in an object it will be 
+    called instead of the standard `toArray()` method.
+  
+Known Bugs and Limitations
+--------------------------
+
+* works only if the name of the primary key field of a model class is "id"
+  
